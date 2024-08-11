@@ -5,7 +5,7 @@ SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Maze Generator and Solver")
-menu_backGround = pygame.image.load("assets/background.png")
+menu_backGround = pygame.image.load("assets/backgroundv2.png")
 game_backGround = pygame.image.load("assets/play_background.png")
 red = pygame.Color(255,0,0)
 black = pygame.Color(0,0,0)
@@ -61,7 +61,7 @@ def main_menu():
     while run == True:
         screen.blit(menu_backGround, (0,0))
         menu_mouse_pos = pygame.mouse.get_pos()
-        heading_main_menu_text = get_font(100).render("MAIN MENU", True, "#b68f40")
+        heading_main_menu_text = get_font(135).render("MAZE", True, "#b68f40")
         menu_rect = heading_main_menu_text.get_rect(center=(640,100))
 
         ONE_PLAYER_BUTTON = Button(pos=(640,250), button_font=get_font(40), base_colour= white, hovering_colour="#d7fcd4", input_text="1 PLAYER", image=None, x_start=475, y_start=200, x_end=780, y_end=300)
