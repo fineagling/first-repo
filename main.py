@@ -1,4 +1,4 @@
-import pygame, sys
+import pygame, sys, time
 from engine import Button
 from random import choice
 pygame.init()
@@ -14,12 +14,18 @@ green = pygame.Color(0,255,0)
 white = pygame.Color(255,255,255)
 run = True
 RES = SCREEN_WIDTH, SCREEN_HEIGHT
-TILE = 20
+TILE = 40
 collums = 900 // TILE
 rows = 700 // TILE
 clock = pygame.time.Clock()
 distance_from_corner_x = 300
 distance_from_corner_y = 10
+global visited_origin
+visited_origin = 0
+global maze_complete
+maze_complete = 0
+TILE_number_x = 0
+TILE_number_y = 0
 def get_font(size):
     return pygame.font.Font("assets/font.ttf", size)
 
@@ -30,12 +36,23 @@ def one_player(run):
             self.x, self.y = x, y
             self.walls = {"top": True, "right": True, "bottom": True, "left": True}
             self.visited = False
-            self.thickness = 2
+            self.thickness = 1
+            
+        
     
-        def draw_current_cell(self):
+        def draw_current_cell(self, visited_origin, maze_complete):
             x, y = self.x * TILE, self.y * TILE
-            pygame.draw.rect(screen, pygame.Color("yellow"), (x + self.thickness + distance_from_corner_x, y + self.thickness + distance_from_corner_y, TILE - self.thickness, TILE - self.thickness)) 
-
+            if x == 0 and y == 0:
+                visited_origin = visited_origin + 1            
+            
+            if visited_origin == 0:
+                pygame.draw.rect(screen, pygame.Color("yellow"), (x + self.thickness + distance_from_corner_x, y + self.thickness + distance_from_corner_y, TILE - self.thickness, TILE - self.thickness)) 
+                
+            elif visited_origin == 1:
+                maze_complete = maze_complete + 1
+                pygame.draw.rect(screen, pygame.Color("blue"), (x + self.thickness + distance_from_corner_x, y + self.thickness + distance_from_corner_y, TILE - self.thickness, TILE - self.thickness))
+           
+       
         def draw(self):
             x, y = (self.x * TILE) + distance_from_corner_x, (self.y * TILE) + distance_from_corner_y
             if self.visited:
@@ -71,7 +88,17 @@ def one_player(run):
             if right and not right.visited:
                 neighbours.append(right)
             return choice(neighbours) if neighbours else False
+       
+    def check_if_mouse_in_maze(position):
+        if position[0] in range(distance_from_corner_x, (collums * TILE) + distance_from_corner_x) and position[1] in range(distance_from_corner_y, (rows * TILE) + distance_from_corner_y):  
+            return True
         
+    def display_start_and_end_tiles(position):
+        TILE_number_x = (position[0] - (distance_from_corner_x - TILE))//TILE
+        TILE_number_y = (position[1]-(distance_from_corner_y - TILE))//TILE
+        pygame.draw.rect(screen, pygame.Color("green"), (distance_from_corner_x + ((TILE_number_x - 1) * TILE), distance_from_corner_y + ((TILE_number_y-1) * TILE), TILE, TILE) ) 
+        
+    
     def remove_walls(current, next):
         dx = current.x - next.x
         if dx == 1:
@@ -91,7 +118,7 @@ def one_player(run):
     grid_cells = [Cell(col, row) for row in range(rows) for col in range(collums)]
     current_cell = grid_cells[0]
     stack = []
- 
+    
     while run:
         screen.fill("#2a0807")
         one_play_mouse_pos = pygame.mouse.get_pos()
@@ -107,10 +134,16 @@ def one_player(run):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if ONE_PLAY_BACK.checkforinput(one_play_mouse_pos):
                     main_menu()
+                if maze_complete == 0 and check_if_mouse_in_maze(one_play_mouse_pos):
+                    display_start_and_end_tiles(one_play_mouse_pos)
+                    
+                    #think that it is being overwritten with a black tile
+                    
     
         [Cell.draw() for Cell in grid_cells]
         current_cell.visited = True
-        current_cell.draw_current_cell()
+        current_cell.draw_current_cell(visited_origin, maze_complete)
+        
 
         next_cell = current_cell.check_neighbours()
         if next_cell:
@@ -120,7 +153,7 @@ def one_player(run):
             current_cell = next_cell
         elif stack:
             current_cell = stack.pop()
-        
+
         clock.tick(2000)
         pygame.display.update()
         
