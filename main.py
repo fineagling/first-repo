@@ -26,10 +26,8 @@ global maze_complete
 maze_complete = 0
 TILE_number_x = 0
 TILE_number_y = 0
-
 def get_font(size):
     return pygame.font.Font("assets/GamePlayed.ttf", size)
-
 
 def one_player(run):
     class Cell:
@@ -46,14 +44,15 @@ def one_player(run):
             
             if visited_origin == 0:
                 pygame.draw.rect(screen, pygame.Color("yellow"), (x + self.thickness + distance_from_corner_x, y + self.thickness + distance_from_corner_y, TILE - self.thickness, TILE - self.thickness)) 
-                
             elif visited_origin == 1:
                 maze_complete = maze_complete + 1
                 pygame.draw.rect(screen, pygame.Color("blue"), (x + self.thickness + distance_from_corner_x, y + self.thickness + distance_from_corner_y, TILE - self.thickness, TILE - self.thickness))
            
         def draw(self):
             x, y = (self.x * TILE) + distance_from_corner_x, (self.y * TILE) + distance_from_corner_y
-            if self.visited and (self.x != (TILE_number_x -1)) and (self.y != (TILE_number_y - 1)):
+            tile_number_pos = [(TILE_number_x - 1), (TILE_number_y - 1)]
+            coordinates_pos = [self.x, self.y]
+            if self.visited and (tile_number_pos != coordinates_pos):
                 pygame.draw.rect(screen, pygame.Color("black"), (x, y, TILE, TILE))
             else:
                 pygame.draw.rect(screen, pygame.Color("green"), (distance_from_corner_x + ((TILE_number_x - 1) * TILE), distance_from_corner_y + ((TILE_number_y-1) * TILE), TILE, TILE) )
@@ -122,7 +121,7 @@ def one_player(run):
     while run:
         screen.fill("#2a0807")
         one_play_mouse_pos = pygame.mouse.get_pos()
-        ONE_PLAY_BACK = Button(pos=(100, 600), button_font= get_font(30), base_colour= white, hovering_colour= "#d7fcd4", input_text="BACK", image= "assets/back_rect.png", x_start=50, y_start= 550, x_end= 150, y_end=650)
+        ONE_PLAY_BACK = Button(pos=(100, 600), button_font= get_font(50), base_colour= white, hovering_colour= "#d7fcd4", input_text="BACK", image= "assets/back_rect.png", x_start=50, y_start= 550, x_end= 150, y_end=650)
         for button in [ONE_PLAY_BACK]:
             button.changecolour(one_play_mouse_pos)
             button.text_update(screen)
@@ -150,15 +149,14 @@ def one_player(run):
         elif stack:
             current_cell = stack.pop()
 
-        clock.tick(2000)
+        clock.tick(200000)
         pygame.display.update()
         
-def two_player(run):
-    
+def two_player(run):  
     while run:
         screen.fill("#2a0807")
         two_play_mouse_pos = pygame.mouse.get_pos()
-        TWO_PLAY_BACK = Button(pos=(100, 600), button_font= get_font(30), base_colour= white, hovering_colour= "#d7fcd4", input_text="BACK", image= "assets/back_rect.png", x_start=50, y_start= 550, x_end= 150, y_end=650)
+        TWO_PLAY_BACK = Button(pos=(100, 600), button_font= get_font(50), base_colour= white, hovering_colour= "#d7fcd4", input_text="BACK", image= "assets/back_rect.png", x_start=50, y_start= 550, x_end= 150, y_end=650)
         for button in [TWO_PLAY_BACK]:
             button.changecolour(two_play_mouse_pos)
             button.text_update(screen)
@@ -172,8 +170,6 @@ def two_player(run):
                     main_menu()
     
         pygame.display.update()
-
-
 
 def main_menu():
     while run == True:
