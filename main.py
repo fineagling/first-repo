@@ -26,8 +26,9 @@ global maze_complete
 maze_complete = 0
 TILE_number_x = 0
 TILE_number_y = 0
+
 def get_font(size):
-    return pygame.font.Font("assets/font.ttf", size)
+    return pygame.font.Font("assets/GamePlayed.ttf", size)
 
 
 def one_player(run):
@@ -37,8 +38,6 @@ def one_player(run):
             self.walls = {"top": True, "right": True, "bottom": True, "left": True}
             self.visited = False
             self.thickness = 1
-            
-        
     
         def draw_current_cell(self, visited_origin, maze_complete):
             x, y = self.x * TILE, self.y * TILE
@@ -52,11 +51,12 @@ def one_player(run):
                 maze_complete = maze_complete + 1
                 pygame.draw.rect(screen, pygame.Color("blue"), (x + self.thickness + distance_from_corner_x, y + self.thickness + distance_from_corner_y, TILE - self.thickness, TILE - self.thickness))
            
-       
         def draw(self):
             x, y = (self.x * TILE) + distance_from_corner_x, (self.y * TILE) + distance_from_corner_y
-            if self.visited:
+            if self.visited and (self.x != (TILE_number_x -1)) and (self.y != (TILE_number_y - 1)):
                 pygame.draw.rect(screen, pygame.Color("black"), (x, y, TILE, TILE))
+            else:
+                pygame.draw.rect(screen, pygame.Color("green"), (distance_from_corner_x + ((TILE_number_x - 1) * TILE), distance_from_corner_y + ((TILE_number_y-1) * TILE), TILE, TILE) )
             
             if self.walls["top"]:
                 pygame.draw.line(screen, pygame.Color("red"), (x, y), (x + TILE, y), self.thickness)
@@ -94,10 +94,10 @@ def one_player(run):
             return True
         
     def display_start_and_end_tiles(position):
+        global TILE_number_x
         TILE_number_x = (position[0] - (distance_from_corner_x - TILE))//TILE
+        global TILE_number_y
         TILE_number_y = (position[1]-(distance_from_corner_y - TILE))//TILE
-        pygame.draw.rect(screen, pygame.Color("green"), (distance_from_corner_x + ((TILE_number_x - 1) * TILE), distance_from_corner_y + ((TILE_number_y-1) * TILE), TILE, TILE) ) 
-        
     
     def remove_walls(current, next):
         dx = current.x - next.x
@@ -136,14 +136,10 @@ def one_player(run):
                     main_menu()
                 if maze_complete == 0 and check_if_mouse_in_maze(one_play_mouse_pos):
                     display_start_and_end_tiles(one_play_mouse_pos)
-                    
-                    #think that it is being overwritten with a black tile
-                    
     
         [Cell.draw() for Cell in grid_cells]
         current_cell.visited = True
         current_cell.draw_current_cell(visited_origin, maze_complete)
-        
 
         next_cell = current_cell.check_neighbours()
         if next_cell:
@@ -183,12 +179,12 @@ def main_menu():
     while run == True:
         screen.blit(menu_backGround, (0,0))
         menu_mouse_pos = pygame.mouse.get_pos()
-        heading_main_menu_text = get_font(135).render("MAZE", True, "#b68f40")
+        heading_main_menu_text = get_font(180).render("MAZE", True, "#b68f40")
         menu_rect = heading_main_menu_text.get_rect(center=(640,100))
 
-        ONE_PLAYER_BUTTON = Button(pos=(640,250), button_font=get_font(40), base_colour= white, hovering_colour="#d7fcd4", input_text="1 PLAYER", image=None, x_start=475, y_start=200, x_end=780, y_end=300)
-        TWO_PLAYER_BUTTOM = Button(pos=(640,400), button_font=get_font(40), base_colour=white, hovering_colour="#d7fcd4", input_text="2 PLAYER", image=None, x_start=475, y_start=350, x_end=780, y_end=450) 
-        QUIT_BUTTON = Button(pos=(640,550), button_font=get_font(40), base_colour=white, hovering_colour="#d7fcd4", input_text="QUIT", image=None, x_start=475, y_start=500, x_end=780, y_end=600) 
+        ONE_PLAYER_BUTTON = Button(pos=(640,250), button_font=get_font(60), base_colour= white, hovering_colour="#d7fcd4", input_text="1 PLAYER", image=None, x_start=475, y_start=200, x_end=780, y_end=300)
+        TWO_PLAYER_BUTTOM = Button(pos=(640,400), button_font=get_font(60), base_colour=white, hovering_colour="#d7fcd4", input_text="2 PLAYER", image=None, x_start=475, y_start=350, x_end=780, y_end=450) 
+        QUIT_BUTTON = Button(pos=(640,550), button_font=get_font(60), base_colour=white, hovering_colour="#d7fcd4", input_text="QUIT", image=None, x_start=475, y_start=500, x_end=780, y_end=600) 
         screen.blit(heading_main_menu_text, menu_rect)
 
         for button in [ONE_PLAYER_BUTTON, TWO_PLAYER_BUTTOM, QUIT_BUTTON]:
