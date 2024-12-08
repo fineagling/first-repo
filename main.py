@@ -12,6 +12,10 @@ red = pygame.Color(255,0,0)
 black = pygame.Color(0,0,0)
 green = pygame.Color(0,255,0)
 white = pygame.Color(255,255,255)
+colour_input_active = pygame.Color("lightskyblue3")
+colour_input_passive = pygame.Color("black")
+colour = colour_input_passive
+active = False
 run = True
 RES = SCREEN_WIDTH, SCREEN_HEIGHT
 TILE = 40
@@ -22,10 +26,13 @@ distance_from_corner_x = 300
 distance_from_corner_y = 10
 global visited_origin
 visited_origin = 0
-#global maze_complete
 maze_complete = False
 TILE_number_x = 0
 TILE_number_y = 0
+user_text = ''
+input_size_rect = pygame.Rect(30,430,140,50)
+is_text_inputted = False
+
 def get_font(size):
     return pygame.font.Font("assets/GamePlayed.ttf", size)
 
@@ -122,10 +129,16 @@ def one_player(run):
         screen.fill("#2a0807")
         one_play_mouse_pos = pygame.mouse.get_pos()
         ONE_PLAY_BACK = Button(pos=(100, 600), button_font= get_font(50), base_colour= white, hovering_colour= "#d7fcd4", input_text="BACK", image= "assets/back_rect.png", x_start=50, y_start= 550, x_end= 150, y_end=650)
-        global maze_complete
+        global maze_complete, active, user_text, colour, is_text_inputted
+
         for button in [ONE_PLAY_BACK]:
             button.changecolour(one_play_mouse_pos)
             button.text_update(screen)
+
+        pygame.draw.rect(screen, colour, input_size_rect)
+        input_text_surface = get_font(32).render(user_text, True, (255, 255, 255))
+        screen.blit(input_text_surface, (input_size_rect.x + 5, input_size_rect.y + 5))
+        input_size_rect.w = max(100, input_text_surface.get_width() + 10)        
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -136,24 +149,43 @@ def one_player(run):
                     main_menu()
                 if maze_complete and check_if_mouse_in_maze(one_play_mouse_pos):
                     gather_tile_number(one_play_mouse_pos)
+                if input_size_rect.collidepoint(event.pos):
+                    active = True
+                else:
+                    active = False
+            if event.type == pygame.KEYDOWN and event.unicode.isdigit():               
+                is_text_inputted = True
+                if event.key == pygame.K_BACKSPACE:
+                    user_text = user_text[:-1]
+                else:
+                    user_text += event.unicode
 
-    
-        [Cell.draw() for Cell in grid_cells]
-        current_cell.visited = True
-        current_cell.draw_current_cell(visited_origin)
+        if is_text_inputted:
+            [Cell.draw() for Cell in grid_cells]
+            current_cell.visited = True
+            current_cell.draw_current_cell(visited_origin)
 
-        next_cell = current_cell.check_neighbours()
-        if next_cell:
-            next_cell.visited = True
-            stack.append(current_cell)
-            remove_walls(current_cell, next_cell)
-            current_cell = next_cell
-        elif stack:
-            current_cell = stack.pop()
-        elif next_cell == False:
-            maze_complete = True
+            next_cell = current_cell.check_neighbours()
+            if next_cell:
+                next_cell.visited = True
+                stack.append(current_cell)
+                remove_walls(current_cell, next_cell)
+                current_cell = next_cell
+            elif stack:
+                current_cell = stack.pop()
+            elif next_cell == False:
+                maze_complete = True
             
+        if active:
+            colour = colour_input_active
+        else:
+            colour = colour_input_passive
 
+        pygame.draw.rect(screen, colour, input_size_rect)
+        input_text_surface = get_font(32).render(user_text, True, (255, 255, 255))
+        screen.blit(input_text_surface, (input_size_rect.x + 5, input_size_rect.y + 5))
+        input_size_rect.w = max(140, input_text_surface.get_width() + 10)     
+        
         clock.tick(200000)
         pygame.display.update()
         
