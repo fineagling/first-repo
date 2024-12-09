@@ -29,9 +29,10 @@ visited_origin = 0
 maze_complete = False
 TILE_number_x = 0
 TILE_number_y = 0
-user_text = ''
+user_text = ""
 input_size_rect = pygame.Rect(30,430,140,50)
 is_text_inputted = False
+is_input_full = False
 
 def get_font(size):
     return pygame.font.Font("assets/GamePlayed.ttf", size)
@@ -51,9 +52,6 @@ def one_player(run):
             
             if visited_origin == 0:
                 pygame.draw.rect(screen, pygame.Color("yellow"), (x + self.thickness + distance_from_corner_x, y + self.thickness + distance_from_corner_y, TILE - self.thickness, TILE - self.thickness)) 
-            #elif visited_origin == 1:
-                #maze_complete = maze_complete + 1
-                #pygame.draw.rect(screen, pygame.Color("blue"), (x + self.thickness + distance_from_corner_x, y + self.thickness + distance_from_corner_y, TILE - self.thickness, TILE - self.thickness))
            
         def draw(self):
             x, y = (self.x * TILE) + distance_from_corner_x, (self.y * TILE) + distance_from_corner_y
@@ -129,7 +127,7 @@ def one_player(run):
         screen.fill("#2a0807")
         one_play_mouse_pos = pygame.mouse.get_pos()
         ONE_PLAY_BACK = Button(pos=(100, 600), button_font= get_font(50), base_colour= white, hovering_colour= "#d7fcd4", input_text="BACK", image= "assets/back_rect.png", x_start=50, y_start= 550, x_end= 150, y_end=650)
-        global maze_complete, active, user_text, colour, is_text_inputted
+        global maze_complete, active, user_text, colour, is_text_inputted, is_input_full
 
         for button in [ONE_PLAY_BACK]:
             button.changecolour(one_play_mouse_pos)
@@ -157,10 +155,17 @@ def one_player(run):
                 is_text_inputted = True
                 if event.key == pygame.K_BACKSPACE:
                     user_text = user_text[:-1]
-                else:
+                elif len(user_text) != 2:
                     user_text += event.unicode
+                else:
+                    is_input_full = True
 
-        if is_text_inputted:
+                    
+
+        
+        
+        
+        if is_text_inputted and is_input_full:
             [Cell.draw() for Cell in grid_cells]
             current_cell.visited = True
             current_cell.draw_current_cell(visited_origin)
@@ -237,3 +242,4 @@ def main_menu():
 
         pygame.display.update()
 main_menu()
+
