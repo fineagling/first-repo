@@ -18,7 +18,7 @@ colour = colour_input_passive
 active = False
 run = True
 RES = SCREEN_WIDTH, SCREEN_HEIGHT
-TILE = 40
+TILE = 60
 collums = 900 // TILE
 rows = 700 // TILE
 clock = pygame.time.Clock()
@@ -33,6 +33,15 @@ user_text = ""
 input_size_rect = pygame.Rect(30,430,140,50)
 is_text_inputted = False
 is_input_full = False
+TILE_changed_value = 0
+start_coordinate = []
+end_coordinate = []
+maze_clicked_number = 0
+def TILE_change(TILE, user_text, collums, rows):
+    TILE = (1901/99) + ((79/99) * (int(user_text)))
+    collums = 900 // TILE
+    rows = 700 // TILE
+    return TILE_changed_value
 
 def get_font(size):
     return pygame.font.Font("assets/GamePlayed.ttf", size)
@@ -53,15 +62,25 @@ def one_player(run):
             if visited_origin == 0:
                 pygame.draw.rect(screen, pygame.Color("yellow"), (x + self.thickness + distance_from_corner_x, y + self.thickness + distance_from_corner_y, TILE - self.thickness, TILE - self.thickness)) 
            
+
         def draw(self):
             x, y = (self.x * TILE) + distance_from_corner_x, (self.y * TILE) + distance_from_corner_y
             tile_number_pos = [(TILE_number_x - 1), (TILE_number_y - 1)]
             coordinates_pos = [self.x, self.y]
+            
+            global maze_clicked_number, start_coordinate, end_coordinate
             if self.visited and (tile_number_pos != coordinates_pos):
                 pygame.draw.rect(screen, pygame.Color("black"), (x, y, TILE, TILE))
             else:
-                pygame.draw.rect(screen, pygame.Color("green"), (distance_from_corner_x + ((TILE_number_x - 1) * TILE), distance_from_corner_y + ((TILE_number_y-1) * TILE), TILE, TILE) )
-            
+                if maze_clicked_number == 1:                  
+                    pygame.draw.rect(screen, pygame.Color("green"), (distance_from_corner_x + ((TILE_number_x - 1) * TILE), distance_from_corner_y + ((TILE_number_y-1) * TILE), TILE, TILE) )
+                    start_coordinate = coordinates_pos
+                if maze_clicked_number == 2:
+                    pygame.draw.rect(screen, pygame.Color("green"), (distance_from_corner_x + ((TILE_number_x - 1) * TILE), distance_from_corner_y + ((TILE_number_y-1) * TILE), TILE, TILE) )
+                    end_coordinate = coordinates_pos
+                if maze_clicked_number >= 3:
+                    pygame.draw.rect(screen, pygame.Color("black"), (x, y, TILE, TILE))
+
             if self.walls["top"]:
                 pygame.draw.line(screen, pygame.Color("red"), (x, y), (x + TILE, y), self.thickness)
             if self.walls["bottom"]:
@@ -92,6 +111,18 @@ def one_player(run):
             if right and not right.visited:
                 neighbours.append(right)
             return choice(neighbours) if neighbours else False
+
+        def make_array_of_dictionaries(self):
+            dictionaries_array = []
+            for i in range(rows):
+                array_per_row = []
+                for j in range(collums):
+                    array_per_row.append(self.walls)
+                dictionaries_array.append(array_per_row)
+            return dictionaries_array
+            #doesnt quite work but getting there need to make 2d array instead
+
+    
        
     def check_if_mouse_in_maze(position):
         if position[0] in range(distance_from_corner_x, (collums * TILE) + distance_from_corner_x) and position[1] in range(distance_from_corner_y, (rows * TILE) + distance_from_corner_y):  
@@ -123,11 +154,20 @@ def one_player(run):
     current_cell = grid_cells[0]
     stack = []
     
+    def breadth_first_search(start_coordinate, end_coordinate):
+        array_of_possible_cells = [Cell.make_array_of_dictionaries() for Cell in grid_cells] 
+        print(array_of_possible_cells)
+        #semi working
+        
+   
+   
+   
+   
     while run:
         screen.fill("#2a0807")
         one_play_mouse_pos = pygame.mouse.get_pos()
         ONE_PLAY_BACK = Button(pos=(100, 600), button_font= get_font(50), base_colour= white, hovering_colour= "#d7fcd4", input_text="BACK", image= "assets/back_rect.png", x_start=50, y_start= 550, x_end= 150, y_end=650)
-        global maze_complete, active, user_text, colour, is_text_inputted, is_input_full
+        global maze_complete, active, user_text, colour, is_text_inputted, is_input_full, maze_clicked_number
 
         for button in [ONE_PLAY_BACK]:
             button.changecolour(one_play_mouse_pos)
@@ -145,8 +185,10 @@ def one_player(run):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if ONE_PLAY_BACK.checkforinput(one_play_mouse_pos):
                     main_menu()
-                if maze_complete and check_if_mouse_in_maze(one_play_mouse_pos):
+                if maze_complete and check_if_mouse_in_maze(one_play_mouse_pos) and maze_clicked_number <= 2:
                     gather_tile_number(one_play_mouse_pos)
+                    maze_clicked_number = maze_clicked_number + 1
+                    breadth_first_search(start_coordinate, end_coordinate)
                 if input_size_rect.collidepoint(event.pos):
                     active = True
                 else:
@@ -155,15 +197,14 @@ def one_player(run):
                 is_text_inputted = True
                 if event.key == pygame.K_BACKSPACE:
                     user_text = user_text[:-1]
-                elif len(user_text) != 2:
+                elif len(user_text) <= 1:
                     user_text += event.unicode
                 else:
+                    TILE_change(TILE, user_text, collums, rows)
+                    #if TILE == TILE_changed_value:
                     is_input_full = True
-
                     
-
-        
-        
+                     
         
         if is_text_inputted and is_input_full:
             [Cell.draw() for Cell in grid_cells]
