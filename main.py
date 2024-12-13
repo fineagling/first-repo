@@ -121,6 +121,11 @@ def one_player(run):
                 dictionaries_array.append(array_per_row)
             return dictionaries_array
             #doesnt quite work but getting there need to make 2d array instead
+            #intead need to do something like dictionaries_aray = [[0 for i in range(colums)] for j in range(rows)]
+            #then try the rest of the code but addapt it, use the i loop to hold data for each row using the array[][0] part and the j loop to alter the array[0][] part 
+            #use self.x and self.y to add each dictionary to the position that is specified by the statement at the start of BFS, don't need to make an i and j loop
+            #use dictionaries_array[self.x][self.y] = self.walls
+            
 
     
        
