@@ -114,6 +114,8 @@ def one_player(run):
             return choice(neighbours) if neighbours else False
 
         def make_array_of_dictionaries(self):
+            self.walls["x"] = self.x
+            self.walls["y"] = self.y
             return self.walls
 
     def check_if_mouse_in_maze(position):
@@ -152,9 +154,9 @@ def one_player(run):
         end_walls = (array_of_possible_cells[(end_coordinate[0] + (end_coordinate[1] * collums))])
         print(start_walls)
         print(end_walls)
-        visited = []
-        queue = []
-        neighbours = []
+        queue = [end_walls]
+        visited = [start_walls]
+        
 
 
 
