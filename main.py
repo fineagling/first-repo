@@ -37,6 +37,7 @@ TILE_changed_value = 0
 start_coordinate = []
 end_coordinate = []
 maze_clicked_number = 0
+dictionaries_array = [[0 for i in range(rows)] for j in range(collums)]
 def TILE_change(TILE, user_text, collums, rows):
     TILE = (1901/99) + ((79/99) * (int(user_text)))
     collums = 900 // TILE
@@ -113,17 +114,8 @@ def one_player(run):
             return choice(neighbours) if neighbours else False
 
         def make_array_of_dictionaries(self):
-            dictionaries_array = []
-            for i in range(rows):
-                array_per_row = []
-                for j in range(collums):
-                    array_per_row.append(self.walls)
-                dictionaries_array.append(array_per_row)
-            return dictionaries_array
-            #doesnt quite work but getting there need to make 2d array instead
+            return self.walls
 
-    
-       
     def check_if_mouse_in_maze(position):
         if position[0] in range(distance_from_corner_x, (collums * TILE) + distance_from_corner_x) and position[1] in range(distance_from_corner_y, (rows * TILE) + distance_from_corner_y):  
             return True
@@ -155,9 +147,17 @@ def one_player(run):
     stack = []
     
     def breadth_first_search(start_coordinate, end_coordinate):
-        array_of_possible_cells = [Cell.make_array_of_dictionaries() for Cell in grid_cells] 
-        print(array_of_possible_cells)
-        #semi working
+        array_of_possible_cells = [Cell.make_array_of_dictionaries() for Cell in grid_cells]
+        start_walls = (array_of_possible_cells[(start_coordinate[0] + (start_coordinate[1] * collums))])
+        end_walls = (array_of_possible_cells[(end_coordinate[0] + (end_coordinate[1] * collums))])
+        print(start_walls)
+        print(end_walls)
+        visited = []
+        queue = []
+        neighbours = []
+
+
+
         
    
    
@@ -188,6 +188,7 @@ def one_player(run):
                 if maze_complete and check_if_mouse_in_maze(one_play_mouse_pos) and maze_clicked_number <= 2:
                     gather_tile_number(one_play_mouse_pos)
                     maze_clicked_number = maze_clicked_number + 1
+                if maze_clicked_number > 2:
                     breadth_first_search(start_coordinate, end_coordinate)
                 if input_size_rect.collidepoint(event.pos):
                     active = True
