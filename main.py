@@ -42,10 +42,8 @@ def one_player(run):
 
         def draw(self):
             x, y = (self.x * TILE) + distance_from_corner_x, (self.y * TILE) + distance_from_corner_y
-            #defining x and y as the x and y coordinate multiplied by the TILE size, and adding on x and y values to draw the cells in the middle of the screen
             if self.visited:
                 pygame.draw.rect(screen, pygame.Color("black"), (x, y, TILE, TILE))
-                #if a cells is visted then draw a black background on it
             
             if self.walls["top"]:
                 pygame.draw.line(screen, pygame.Color("red"), (x, y), (x + TILE, y), self.thickness)
@@ -55,7 +53,6 @@ def one_player(run):
                 pygame.draw.line(screen, pygame.Color("red"), (x, y + TILE), (x, y), self.thickness)
             if self.walls["right"]:
                 pygame.draw.line(screen, pygame.Color("red"), (x + TILE, y), (x + TILE, y + TILE), self.thickness)
-                #each side of the cell that is true from the dictionary, the cell still has and therefore we draw that side
 
         
 
