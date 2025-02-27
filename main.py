@@ -1,4 +1,4 @@
-import pygame, sys, time
+import pygame, sys
 from engine import Button
 from random import choice
 pygame.init()
@@ -12,13 +12,9 @@ red = pygame.Color(255,0,0)
 black = pygame.Color(0,0,0)
 green = pygame.Color(0,255,0)
 white = pygame.Color(255,255,255)
-colour_input_active = pygame.Color("lightskyblue3")
-colour_input_passive = pygame.Color("black")
-colour = colour_input_passive
-active = False
 run = True
 RES = SCREEN_WIDTH, SCREEN_HEIGHT
-TILE = 60
+TILE = 50
 collums = 900 // TILE
 rows = 700 // TILE
 clock = pygame.time.Clock()
@@ -26,11 +22,15 @@ distance_from_corner_x = 300
 distance_from_corner_y = 10
 global visited_origin
 visited_origin = 0
+active = False
 maze_complete = False
 TILE_number_x = 0
 TILE_number_y = 0
 user_text = ""
 input_size_rect = pygame.Rect(30,430,140,50)
+colour_input_active = pygame.Color("lightskyblue3")
+colour_input_passive = pygame.Color("black")
+colour = colour_input_passive
 is_text_inputted = False
 is_input_full = False
 TILE_changed_value = 0
@@ -38,6 +38,7 @@ start_coordinate = []
 end_coordinate = []
 maze_clicked_number = 0
 dictionaries_array = [[0 for i in range(rows)] for j in range(collums)]
+breadth_first_search_complete = False
 def TILE_change(TILE, user_text, collums, rows):
     TILE = (1901/99) + ((79/99) * (int(user_text)))
     collums = 900 // TILE
@@ -147,16 +148,47 @@ def one_player(run):
     grid_cells = [Cell(col, row) for row in range(rows) for col in range(collums)]
     current_cell = grid_cells[0]
     stack = []
-    
+
+
     def breadth_first_search(start_coordinate, end_coordinate):
         array_of_possible_cells = [Cell.make_array_of_dictionaries() for Cell in grid_cells]
         start_walls = (array_of_possible_cells[(start_coordinate[0] + (start_coordinate[1] * collums))])
         end_walls = (array_of_possible_cells[(end_coordinate[0] + (end_coordinate[1] * collums))])
-        print(start_walls)
-        print(end_walls)
-        queue = [end_walls]
-        visited = [start_walls]
+        queue = [start_walls]
+        visited = []
+        while len(queue) > 0:
+            print("poo")
+            breadth_current_cell = queue.pop(0)
+            if breadth_current_cell == end_walls:
+                break
+            if breadth_current_cell['top'] == False:
+                x_temp = breadth_current_cell['x']
+                y_temp = breadth_current_cell['y']
+                child_cell_1 = array_of_possible_cells[((y_temp * collums) + (x_temp)) - collums]
+                queue.append(child_cell_1)
+            if breadth_current_cell['bottom'] == False:
+                x_temp = breadth_current_cell['x']
+                y_temp = breadth_current_cell['y']                
+                child_cell_2 = array_of_possible_cells[((y_temp * collums) + (x_temp)) + collums]
+                queue.append(child_cell_2)
+            if breadth_current_cell['right'] == False:
+                x_temp = breadth_current_cell['x']
+                y_temp = breadth_current_cell['y']                
+                child_cell_3 = array_of_possible_cells[((y_temp * collums) + (x_temp)) + 1]
+                queue.append(child_cell_3)
+            if breadth_current_cell['left'] == False:
+                x_temp = breadth_current_cell['x']
+                y_temp = breadth_current_cell['y']                
+                child_cell_4 = array_of_possible_cells[((y_temp * collums) + (x_temp)) - 1]
+                queue.append(child_cell_4)       
+            
+            visited.append(breadth_current_cell)
+            pygame.draw.rect(screen, pygame.Color("blue"), ((TILE * breadth_current_cell['x']) + 1 + distance_from_corner_x, ( TILE * breadth_current_cell['y']) + 1 + distance_from_corner_y, TILE - 1, TILE - 1))
+            pygame.display.update()
         
+            
+                        
+            
 
 
 
