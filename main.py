@@ -1,6 +1,7 @@
 import pygame, sys
 from engine import Button
 from random import choice
+from collections import deque
 pygame.init()
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
@@ -39,6 +40,10 @@ end_coordinate = []
 maze_clicked_number = 0
 dictionaries_array = [[0 for i in range(rows)] for j in range(collums)]
 breadth_first_search_complete = False
+global queue
+queue = deque()
+global cycles
+cycles = 0
 def TILE_change(TILE, user_text, collums, rows):
     TILE = (1901/99) + ((79/99) * (int(user_text)))
     collums = 900 // TILE
@@ -150,52 +155,44 @@ def one_player(run):
     stack = []
 
 
-    def breadth_first_search(start_coordinate, end_coordinate):
+    def breadth_first_search_variables(start_coordinate, end_coordinate):
+        global array_of_possible_cells
+        array_of_possible_cells = deque()
         array_of_possible_cells = [Cell.make_array_of_dictionaries() for Cell in grid_cells]
+        global start_walls
         start_walls = (array_of_possible_cells[(start_coordinate[0] + (start_coordinate[1] * collums))])
+        global end_walls
         end_walls = (array_of_possible_cells[(end_coordinate[0] + (end_coordinate[1] * collums))])
-        queue = [start_walls]
-        visited = []
-        while len(queue) > 0:
-            print("poo")
-            breadth_current_cell = queue.pop(0)
-            if breadth_current_cell == end_walls:
-                break
+        #queue.append(start_walls)
+        global visited
+        visited = deque()
+
+    def BFS_check_neighbours():
             if breadth_current_cell['top'] == False:
                 x_temp = breadth_current_cell['x']
                 y_temp = breadth_current_cell['y']
                 child_cell_1 = array_of_possible_cells[((y_temp * collums) + (x_temp)) - collums]
                 queue.append(child_cell_1)
+                print("added top neighbour to queue")
             if breadth_current_cell['bottom'] == False:
                 x_temp = breadth_current_cell['x']
                 y_temp = breadth_current_cell['y']                
                 child_cell_2 = array_of_possible_cells[((y_temp * collums) + (x_temp)) + collums]
                 queue.append(child_cell_2)
+                print("added bottom neighbour to queue")
             if breadth_current_cell['right'] == False:
                 x_temp = breadth_current_cell['x']
                 y_temp = breadth_current_cell['y']                
                 child_cell_3 = array_of_possible_cells[((y_temp * collums) + (x_temp)) + 1]
                 queue.append(child_cell_3)
+                print("added right neighbour to queue")
             if breadth_current_cell['left'] == False:
                 x_temp = breadth_current_cell['x']
                 y_temp = breadth_current_cell['y']                
                 child_cell_4 = array_of_possible_cells[((y_temp * collums) + (x_temp)) - 1]
-                queue.append(child_cell_4)       
-            
-            visited.append(breadth_current_cell)
-            pygame.draw.rect(screen, pygame.Color("blue"), ((TILE * breadth_current_cell['x']) + 1 + distance_from_corner_x, ( TILE * breadth_current_cell['y']) + 1 + distance_from_corner_y, TILE - 1, TILE - 1))
-            pygame.display.update()
-        
-            
-                        
-            
+                queue.append(child_cell_4)  
+                print("added left neighbour to queue")
 
-
-
-        
-   
-   
-   
    
     while run:
         screen.fill("#2a0807")
@@ -207,10 +204,10 @@ def one_player(run):
             button.changecolour(one_play_mouse_pos)
             button.text_update(screen)
 
-        pygame.draw.rect(screen, colour, input_size_rect)
-        input_text_surface = get_font(32).render(user_text, True, (255, 255, 255))
-        screen.blit(input_text_surface, (input_size_rect.x + 5, input_size_rect.y + 5))
-        input_size_rect.w = max(100, input_text_surface.get_width() + 10)        
+        #pygame.draw.rect(screen, colour, input_size_rect)
+        #input_text_surface = get_font(32).render(user_text, True, (255, 255, 255))
+        #screen.blit(input_text_surface, (input_size_rect.x + 5, input_size_rect.y + 5))
+        #input_size_rect.w = max(100, input_text_surface.get_width() + 10)        
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -222,8 +219,9 @@ def one_player(run):
                 if maze_complete and check_if_mouse_in_maze(one_play_mouse_pos) and maze_clicked_number <= 2:
                     gather_tile_number(one_play_mouse_pos)
                     maze_clicked_number = maze_clicked_number + 1
-                if maze_clicked_number > 2:
-                    breadth_first_search(start_coordinate, end_coordinate)
+                if maze_clicked_number == 3:
+                    breadth_first_search_variables(start_coordinate, end_coordinate)  
+                    queue.append(start_walls)
                 if input_size_rect.collidepoint(event.pos):
                     active = True
                 else:
@@ -239,7 +237,6 @@ def one_player(run):
                     #if TILE == TILE_changed_value:
                     is_input_full = True
                     
-                     
         
         if is_text_inputted and is_input_full:
             [Cell.draw() for Cell in grid_cells]
@@ -262,13 +259,25 @@ def one_player(run):
         else:
             colour = colour_input_passive
 
+        while len(queue) > 0:
+            breadth_current_cell = queue.popleft()
+            if breadth_current_cell == end_walls:
+                break
+            BFS_check_neighbours()
+            visited.append(breadth_current_cell)
+            pygame.draw.rect(screen, pygame.Color("blue"), ((TILE * breadth_current_cell['x']) + 1 + distance_from_corner_x, ( TILE * breadth_current_cell['y']) + 1 + distance_from_corner_y, TILE - 1, TILE - 1))
+            num_in_queue = len(queue)
+            print(num_in_queue)
+            pygame.display.update()
+
         pygame.draw.rect(screen, colour, input_size_rect)
         input_text_surface = get_font(32).render(user_text, True, (255, 255, 255))
         screen.blit(input_text_surface, (input_size_rect.x + 5, input_size_rect.y + 5))
         input_size_rect.w = max(140, input_text_surface.get_width() + 10)     
         
-        clock.tick(200000)
+        clock.tick(200)
         pygame.display.update()
+        
         
 def two_player(run):  
     while run:
