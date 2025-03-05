@@ -15,7 +15,7 @@ green = pygame.Color(0,255,0)
 white = pygame.Color(255,255,255)
 run = True
 RES = SCREEN_WIDTH, SCREEN_HEIGHT
-TILE = 50
+TILE = 75
 collums = 900 // TILE
 rows = 700 // TILE
 clock = pygame.time.Clock()
@@ -45,10 +45,11 @@ queue = deque()
 global cycles
 cycles = 0
 def TILE_change(TILE, user_text, collums, rows):
-    TILE = (1901/99) + ((79/99) * (int(user_text)))
+    TILE_changed_value = (1901/99) + ((79/99) * (int(user_text)))
+    TILE = TILE_changed_value   
     collums = 900 // TILE
     rows = 700 // TILE
-    return TILE_changed_value
+    
 
 def get_font(size):
     return pygame.font.Font("assets/GamePlayed.ttf", size)
@@ -172,27 +173,32 @@ def one_player(run):
                 x_temp = breadth_current_cell['x']
                 y_temp = breadth_current_cell['y']
                 child_cell_1 = array_of_possible_cells[((y_temp * collums) + (x_temp)) - collums]
-                queue.append(child_cell_1)
+                if child_cell_1 not in visited:
+                    queue.append(child_cell_1)
                 print("added top neighbour to queue")
             if breadth_current_cell['bottom'] == False:
                 x_temp = breadth_current_cell['x']
                 y_temp = breadth_current_cell['y']                
                 child_cell_2 = array_of_possible_cells[((y_temp * collums) + (x_temp)) + collums]
-                queue.append(child_cell_2)
+                if child_cell_2 not in visited:
+                    queue.append(child_cell_2)
                 print("added bottom neighbour to queue")
             if breadth_current_cell['right'] == False:
                 x_temp = breadth_current_cell['x']
                 y_temp = breadth_current_cell['y']                
                 child_cell_3 = array_of_possible_cells[((y_temp * collums) + (x_temp)) + 1]
-                queue.append(child_cell_3)
+                if child_cell_3 not in visited:
+                    queue.append(child_cell_3)
                 print("added right neighbour to queue")
             if breadth_current_cell['left'] == False:
                 x_temp = breadth_current_cell['x']
                 y_temp = breadth_current_cell['y']                
                 child_cell_4 = array_of_possible_cells[((y_temp * collums) + (x_temp)) - 1]
-                queue.append(child_cell_4)  
+                if child_cell_4 not in visited:
+                    queue.append(child_cell_4)  
                 print("added left neighbour to queue")
 
+    number_of_run_loops = 0
    
     while run:
         screen.fill("#2a0807")
@@ -221,7 +227,9 @@ def one_player(run):
                     maze_clicked_number = maze_clicked_number + 1
                 if maze_clicked_number == 3:
                     breadth_first_search_variables(start_coordinate, end_coordinate)  
-                    queue.append(start_walls)
+                    number_of_run_loops = number_of_run_loops + 1
+                    if number_of_run_loops == 1:
+                        queue.append(start_walls)
                 if input_size_rect.collidepoint(event.pos):
                     active = True
                 else:
@@ -275,7 +283,7 @@ def one_player(run):
         screen.blit(input_text_surface, (input_size_rect.x + 5, input_size_rect.y + 5))
         input_size_rect.w = max(140, input_text_surface.get_width() + 10)     
         
-        clock.tick(200)
+        clock.tick(2000)
         pygame.display.update()
         
         
