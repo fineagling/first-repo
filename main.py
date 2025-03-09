@@ -15,9 +15,9 @@ green = pygame.Color(0,255,0)
 white = pygame.Color(255,255,255)
 run = True
 RES = SCREEN_WIDTH, SCREEN_HEIGHT
-TILE = 75
-collums = 900 // TILE
-rows = 700 // TILE
+cell_size = 40
+collums = 900 // cell_size
+rows = 700 // cell_size
 clock = pygame.time.Clock()
 distance_from_corner_x = 300
 distance_from_corner_y = 10
@@ -25,8 +25,8 @@ global visited_origin
 visited_origin = 0
 active = False
 maze_complete = False
-TILE_number_x = 0
-TILE_number_y = 0
+cell_size_number_x = 0
+cell_size_number_y = 0
 user_text = ""
 input_size_rect = pygame.Rect(30,430,140,50)
 colour_input_active = pygame.Color("lightskyblue3")
@@ -34,7 +34,7 @@ colour_input_passive = pygame.Color("black")
 colour = colour_input_passive
 is_text_inputted = False
 is_input_full = False
-TILE_changed_value = 0
+cell_size_changed_value = 0
 start_coordinate = []
 end_coordinate = []
 maze_clicked_number = 0
@@ -44,11 +44,13 @@ global queue
 queue = deque()
 global cycles
 cycles = 0
-def TILE_change(TILE, user_text, collums, rows):
-    TILE_changed_value = (1901/99) + ((79/99) * (int(user_text)))
-    TILE = TILE_changed_value   
-    collums = 900 // TILE
-    rows = 700 // TILE
+global path_list
+path_list = []
+def cell_size_change(cell_size, user_text, collums, rows):
+    cell_size_changed_value = (1901/99) + ((79/99) * (int(user_text)))
+    cell_size = cell_size_changed_value   
+    collums = 900 // cell_size
+    rows = 700 // cell_size
     
 
 def get_font(size):
@@ -58,98 +60,101 @@ def one_player(run):
     class Cell:
         def __init__(self, x, y):
             self.x, self.y = x, y
-            self.walls = {"top": True, "right": True, "bottom": True, "left": True}
+            self.walls = {"north": True, "east": True, "south": True, "west": True}
             self.visited = False
             self.thickness = 1
     
         def draw_current_cell(self, visited_origin):
-            x, y = self.x * TILE, self.y * TILE
+            x, y = self.x * cell_size, self.y * cell_size
             if x == 0 and y == 0:
                 visited_origin = visited_origin + 1            
             
             if visited_origin == 0:
-                pygame.draw.rect(screen, pygame.Color("yellow"), (x + self.thickness + distance_from_corner_x, y + self.thickness + distance_from_corner_y, TILE - self.thickness, TILE - self.thickness)) 
+                pygame.draw.rect(screen, pygame.Color("yellow"), (x + self.thickness + distance_from_corner_x, y + self.thickness + distance_from_corner_y, cell_size - self.thickness, cell_size - self.thickness)) 
            
 
         def draw(self):
-            x, y = (self.x * TILE) + distance_from_corner_x, (self.y * TILE) + distance_from_corner_y
-            tile_number_pos = [(TILE_number_x - 1), (TILE_number_y - 1)]
+            x, y = (self.x * cell_size) + distance_from_corner_x, (self.y * cell_size) + distance_from_corner_y
+            cell_number_pos = [(cell_size_number_x - 1), (cell_size_number_y - 1)]
             coordinates_pos = [self.x, self.y]
             
             global maze_clicked_number, start_coordinate, end_coordinate
-            if self.visited and (tile_number_pos != coordinates_pos):
-                pygame.draw.rect(screen, pygame.Color("black"), (x, y, TILE, TILE))
+            if self.visited and (cell_number_pos != coordinates_pos):
+                pygame.draw.rect(screen, pygame.Color("black"), (x, y, cell_size, cell_size))
             else:
                 if maze_clicked_number == 1:                  
-                    pygame.draw.rect(screen, pygame.Color("green"), (distance_from_corner_x + ((TILE_number_x - 1) * TILE), distance_from_corner_y + ((TILE_number_y-1) * TILE), TILE, TILE) )
+                    pygame.draw.rect(screen, pygame.Color("green"), (distance_from_corner_x + ((cell_size_number_x - 1) * cell_size), distance_from_corner_y + ((cell_size_number_y - 1) * cell_size), cell_size, cell_size) )
                     start_coordinate = coordinates_pos
                 if maze_clicked_number == 2:
-                    pygame.draw.rect(screen, pygame.Color("green"), (distance_from_corner_x + ((TILE_number_x - 1) * TILE), distance_from_corner_y + ((TILE_number_y-1) * TILE), TILE, TILE) )
+                    pygame.draw.rect(screen, pygame.Color("green"), (distance_from_corner_x + ((cell_size_number_x - 1) * cell_size), distance_from_corner_y + ((cell_size_number_y - 1) * cell_size), cell_size, cell_size) )
                     end_coordinate = coordinates_pos
                 if maze_clicked_number >= 3:
-                    pygame.draw.rect(screen, pygame.Color("black"), (x, y, TILE, TILE))
+                    pygame.draw.rect(screen, pygame.Color("black"), (x, y, cell_size, cell_size))
 
-            if self.walls["top"]:
-                pygame.draw.line(screen, pygame.Color("red"), (x, y), (x + TILE, y), self.thickness)
-            if self.walls["bottom"]:
-                pygame.draw.line(screen, pygame.Color("red"), (x + TILE, y + TILE), (x, y + TILE), self.thickness)
-            if self.walls["left"]:
-                pygame.draw.line(screen, pygame.Color("red"), (x, y + TILE), (x, y), self.thickness)
-            if self.walls["right"]:
-                pygame.draw.line(screen, pygame.Color("red"), (x + TILE, y), (x + TILE, y + TILE), self.thickness)
+            if self.walls["north"]:
+                pygame.draw.line(screen, pygame.Color("red"), (x, y), (x + cell_size, y), self.thickness)
+            if self.walls["south"]:
+                pygame.draw.line(screen, pygame.Color("red"), (x + cell_size, y + cell_size), (x, y + cell_size), self.thickness)
+            if self.walls["west"]:
+                pygame.draw.line(screen, pygame.Color("red"), (x, y + cell_size), (x, y), self.thickness)
+            if self.walls["east"]:
+                pygame.draw.line(screen, pygame.Color("red"), (x + cell_size, y), (x + cell_size, y + cell_size), self.thickness)
+
 
         def check_cell(self, x, y):
-            find_index = lambda x, y: x + y * collums
+            find_position_in_list = lambda x, y: x + y * collums
             if x < 0 or x > collums - 1 or y < 0 or y > rows - 1:
                 return False
-            return grid_cells[find_index(x, y)]
+            return grid_cells[find_position_in_list(x, y)]
          
         def check_neighbours(self):
             neighbours = []
-            top = self.check_cell(self.x, self.y - 1)
-            bottom = self.check_cell(self.x, self.y + 1)
-            left = self.check_cell(self.x - 1, self.y)
-            right = self.check_cell(self.x + 1, self.y)
-            if top and not top.visited:
-                neighbours.append(top)
-            if bottom and not bottom.visited:
-                neighbours.append(bottom)
-            if left and not left.visited:
-                neighbours.append(left)
-            if right and not right.visited:
-                neighbours.append(right)
+            north = self.check_cell(self.x, self.y - 1)
+            south = self.check_cell(self.x, self.y + 1)
+            west = self.check_cell(self.x - 1, self.y)
+            east = self.check_cell(self.x + 1, self.y)
+            if north and not north.visited:
+                neighbours.append(north)
+            if south and not south.visited:
+                neighbours.append(south)
+            if west and not west.visited:
+                neighbours.append(west)
+            if east and not east.visited:
+                neighbours.append(east)
             return choice(neighbours) if neighbours else False
 
         def make_array_of_dictionaries(self):
             self.walls["x"] = self.x
             self.walls["y"] = self.y
+            self.walls["prev_x"] = 0
+            self.walls["prev_y"] = 0
             return self.walls
-
+        
     def check_if_mouse_in_maze(position):
-        if position[0] in range(distance_from_corner_x, (collums * TILE) + distance_from_corner_x) and position[1] in range(distance_from_corner_y, (rows * TILE) + distance_from_corner_y):  
+        if position[0] in range(distance_from_corner_x, (collums * cell_size) + distance_from_corner_x) and position[1] in range(distance_from_corner_y, (rows * cell_size) + distance_from_corner_y):  
             return True
         
-    def gather_tile_number(position):
-        global TILE_number_x
-        TILE_number_x = (position[0] - (distance_from_corner_x - TILE))//TILE
-        global TILE_number_y
-        TILE_number_y = (position[1]-(distance_from_corner_y - TILE))//TILE
+    def gather_cell_number(position):
+        global cell_size_number_x
+        cell_size_number_x = (position[0] - (distance_from_corner_x - cell_size))//cell_size
+        global cell_size_number_y
+        cell_size_number_y = (position[1]-(distance_from_corner_y - cell_size))//cell_size
     
     def remove_walls(current, next):
-        dx = current.x - next.x
-        if dx == 1:
-            current.walls["left"] = False
-            next.walls["right"] = False
-        elif dx == -1:
-            current.walls["right"] = False
-            next.walls["left"] = False
-        dy = current.y - next.y
-        if dy == 1:
-            current.walls["top"] = False
-            next.walls["bottom"] = False
-        elif dy == -1:
-            current.walls["bottom"] = False
-            next.walls["top"] = False
+        change_in_x = current.x - next.x
+        if change_in_x == 1:
+            current.walls["west"] = False
+            next.walls["east"] = False
+        elif change_in_x == -1:
+            current.walls["east"] = False
+            next.walls["west"] = False
+        change_in_y = current.y - next.y
+        if change_in_y == 1:
+            current.walls["north"] = False
+            next.walls["south"] = False
+        elif change_in_y == -1:
+            current.walls["south"] = False
+            next.walls["north"] = False
 
     grid_cells = [Cell(col, row) for row in range(rows) for col in range(collums)]
     current_cell = grid_cells[0]
@@ -168,37 +173,43 @@ def one_player(run):
         global visited
         visited = deque()
 
+
     def BFS_check_neighbours():
-            if breadth_current_cell['top'] == False:
-                x_temp = breadth_current_cell['x']
-                y_temp = breadth_current_cell['y']
-                child_cell_1 = array_of_possible_cells[((y_temp * collums) + (x_temp)) - collums]
+            if breadth_current_cell['north'] == False:
+                x_temp_1 = breadth_current_cell['x']
+                y_temp_1 = breadth_current_cell['y']
+                child_cell_1 = array_of_possible_cells[((y_temp_1 * collums) + (x_temp_1)) - collums]
                 if child_cell_1 not in visited:
+                    child_cell_1["prev_x"] = child_cell_1["x"]
+                    child_cell_1["prev_y"] = child_cell_1["y"] + 1
                     queue.append(child_cell_1)
-                print("added top neighbour to queue")
-            if breadth_current_cell['bottom'] == False:
-                x_temp = breadth_current_cell['x']
-                y_temp = breadth_current_cell['y']                
-                child_cell_2 = array_of_possible_cells[((y_temp * collums) + (x_temp)) + collums]
+            if breadth_current_cell['south'] == False:
+                x_temp_2 = breadth_current_cell['x']
+                y_temp_2 = breadth_current_cell['y']                
+                child_cell_2 = array_of_possible_cells[((y_temp_2 * collums) + (x_temp_2)) + collums]
                 if child_cell_2 not in visited:
+                    child_cell_2["prev_x"] = child_cell_2["x"]
+                    child_cell_2["prev_y"] = child_cell_2["y"] - 1
                     queue.append(child_cell_2)
-                print("added bottom neighbour to queue")
-            if breadth_current_cell['right'] == False:
-                x_temp = breadth_current_cell['x']
-                y_temp = breadth_current_cell['y']                
-                child_cell_3 = array_of_possible_cells[((y_temp * collums) + (x_temp)) + 1]
+            if breadth_current_cell['east'] == False:
+                x_temp_3 = breadth_current_cell['x']
+                y_temp_3 = breadth_current_cell['y']                
+                child_cell_3 = array_of_possible_cells[((y_temp_3 * collums) + (x_temp_3)) + 1]
                 if child_cell_3 not in visited:
+                    child_cell_3["prev_x"] = child_cell_3["x"] - 1
+                    child_cell_3["prev_y"] = child_cell_3["y"]
                     queue.append(child_cell_3)
-                print("added right neighbour to queue")
-            if breadth_current_cell['left'] == False:
-                x_temp = breadth_current_cell['x']
-                y_temp = breadth_current_cell['y']                
-                child_cell_4 = array_of_possible_cells[((y_temp * collums) + (x_temp)) - 1]
+            if breadth_current_cell['west'] == False:
+                x_temp_4 = breadth_current_cell['x']
+                y_temp_4 = breadth_current_cell['y']                
+                child_cell_4 = array_of_possible_cells[((y_temp_4 * collums) + (x_temp_4)) - 1]
                 if child_cell_4 not in visited:
+                    child_cell_4["prev_x"] = child_cell_4["x"] + 1
+                    child_cell_4["prev_y"] = child_cell_4["y"]
                     queue.append(child_cell_4)  
-                print("added left neighbour to queue")
 
     number_of_run_loops = 0
+    search_complete = False
    
     while run:
         screen.fill("#2a0807")
@@ -223,7 +234,7 @@ def one_player(run):
                 if ONE_PLAY_BACK.checkforinput(one_play_mouse_pos):
                     main_menu()
                 if maze_complete and check_if_mouse_in_maze(one_play_mouse_pos) and maze_clicked_number <= 2:
-                    gather_tile_number(one_play_mouse_pos)
+                    gather_cell_number(one_play_mouse_pos)
                     maze_clicked_number = maze_clicked_number + 1
                 if maze_clicked_number == 3:
                     breadth_first_search_variables(start_coordinate, end_coordinate)  
@@ -241,8 +252,7 @@ def one_player(run):
                 elif len(user_text) <= 1:
                     user_text += event.unicode
                 else:
-                    TILE_change(TILE, user_text, collums, rows)
-                    #if TILE == TILE_changed_value:
+                    cell_size_change(cell_size, user_text, collums, rows)
                     is_input_full = True
                     
         
@@ -267,23 +277,37 @@ def one_player(run):
         else:
             colour = colour_input_passive
 
-        while len(queue) > 0:
+        while len(queue) > 0 and search_complete != True:
             breadth_current_cell = queue.popleft()
             if breadth_current_cell == end_walls:
+                pygame.draw.rect(screen, pygame.Color("blue"), ((cell_size * breadth_current_cell['x']) + 1 + distance_from_corner_x, ( cell_size * breadth_current_cell['y']) + 1 + distance_from_corner_y, cell_size - 1, cell_size - 1))
+                search_complete = True
+                [Cell.draw() for Cell in grid_cells]
                 break
             BFS_check_neighbours()
             visited.append(breadth_current_cell)
-            pygame.draw.rect(screen, pygame.Color("blue"), ((TILE * breadth_current_cell['x']) + 1 + distance_from_corner_x, ( TILE * breadth_current_cell['y']) + 1 + distance_from_corner_y, TILE - 1, TILE - 1))
-            num_in_queue = len(queue)
-            print(num_in_queue)
+            pygame.draw.rect(screen, pygame.Color("blue"), ((cell_size * breadth_current_cell['x']) + 1 + distance_from_corner_x, ( cell_size * breadth_current_cell['y']) + 1 + distance_from_corner_y, cell_size - 1, cell_size - 1))
             pygame.display.update()
+
+        while search_complete == True:
+            while breadth_current_cell != start_walls:
+                previous_temp_x = breadth_current_cell["prev_x"]
+                previous_temp_y = breadth_current_cell["prev_y"]
+                pygame.draw.rect(screen, pygame.Color("yellow"), ((cell_size * breadth_current_cell['x']) + (cell_size/4) + distance_from_corner_x, ( cell_size * breadth_current_cell['y']) + (cell_size/4) + distance_from_corner_y, cell_size - (cell_size//2), cell_size - (cell_size//2)))
+                next_cell_check = array_of_possible_cells[((breadth_current_cell["y"] * collums) + (breadth_current_cell["x"])) + ((previous_temp_y - breadth_current_cell["y"]) * collums) + (previous_temp_x - breadth_current_cell["x"])]
+                breadth_current_cell = next_cell_check
+                pygame.display.update()
+                pygame.draw.rect(screen, pygame.Color("green"), ((cell_size * start_walls['x']) + ((2*cell_size)//10) + distance_from_corner_x, ( cell_size * start_walls['y']) + ((2*cell_size)//10) + distance_from_corner_y, cell_size - ((2*cell_size)//5), cell_size - ((2*cell_size)//5)))
+            
+                
+                 
 
         pygame.draw.rect(screen, colour, input_size_rect)
         input_text_surface = get_font(32).render(user_text, True, (255, 255, 255))
         screen.blit(input_text_surface, (input_size_rect.x + 5, input_size_rect.y + 5))
         input_size_rect.w = max(140, input_text_surface.get_width() + 10)     
         
-        clock.tick(2000)
+        clock.tick(200)
         pygame.display.update()
         
         
