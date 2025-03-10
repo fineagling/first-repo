@@ -51,7 +51,6 @@ def cell_size_change(cell_size, user_text, collums, rows):
     cell_size = cell_size_changed_value   
     collums = 900 // cell_size
     rows = 700 // cell_size
-    
 
 def get_font(size):
     return pygame.font.Font("assets/GamePlayed.ttf", size)
@@ -72,7 +71,6 @@ def one_player(run):
             if visited_origin == 0:
                 pygame.draw.rect(screen, pygame.Color("yellow"), (x + self.thickness + distance_from_corner_x, y + self.thickness + distance_from_corner_y, cell_size - self.thickness, cell_size - self.thickness)) 
            
-
         def draw(self):
             x, y = (self.x * cell_size) + distance_from_corner_x, (self.y * cell_size) + distance_from_corner_y
             cell_number_pos = [(cell_size_number_x - 1), (cell_size_number_y - 1)]
@@ -99,7 +97,6 @@ def one_player(run):
                 pygame.draw.line(screen, pygame.Color("red"), (x, y + cell_size), (x, y), self.thickness)
             if self.walls["east"]:
                 pygame.draw.line(screen, pygame.Color("red"), (x + cell_size, y), (x + cell_size, y + cell_size), self.thickness)
-
 
         def check_cell(self, x, y):
             find_position_in_list = lambda x, y: x + y * collums
@@ -129,6 +126,9 @@ def one_player(run):
             self.walls["prev_x"] = 0
             self.walls["prev_y"] = 0
             return self.walls
+
+        def reset(self):
+            self.visited = False  
         
     def check_if_mouse_in_maze(position):
         if position[0] in range(distance_from_corner_x, (collums * cell_size) + distance_from_corner_x) and position[1] in range(distance_from_corner_y, (rows * cell_size) + distance_from_corner_y):  
@@ -160,7 +160,6 @@ def one_player(run):
     current_cell = grid_cells[0]
     stack = []
 
-
     def breadth_first_search_variables(start_coordinate, end_coordinate):
         global array_of_possible_cells
         array_of_possible_cells = deque()
@@ -169,10 +168,8 @@ def one_player(run):
         start_walls = (array_of_possible_cells[(start_coordinate[0] + (start_coordinate[1] * collums))])
         global end_walls
         end_walls = (array_of_possible_cells[(end_coordinate[0] + (end_coordinate[1] * collums))])
-        #queue.append(start_walls)
         global visited
         visited = deque()
-
 
     def BFS_check_neighbours():
             if breadth_current_cell['north'] == False:
@@ -208,6 +205,11 @@ def one_player(run):
                     child_cell_4["prev_y"] = child_cell_4["y"]
                     queue.append(child_cell_4)  
 
+    def display_default_image():
+        default_maze = pygame.image.load("assets/default_maze.png")
+        screen.blit(default_maze, (distance_from_corner_x, distance_from_corner_y))
+        pygame.display.update()
+
     number_of_run_loops = 0
     search_complete = False
    
@@ -220,12 +222,7 @@ def one_player(run):
         for button in [ONE_PLAY_BACK]:
             button.changecolour(one_play_mouse_pos)
             button.text_update(screen)
-
-        #pygame.draw.rect(screen, colour, input_size_rect)
-        #input_text_surface = get_font(32).render(user_text, True, (255, 255, 255))
-        #screen.blit(input_text_surface, (input_size_rect.x + 5, input_size_rect.y + 5))
-        #input_size_rect.w = max(100, input_text_surface.get_width() + 10)        
-
+      
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -254,7 +251,9 @@ def one_player(run):
                 else:
                     cell_size_change(cell_size, user_text, collums, rows)
                     is_input_full = True
-                    
+            
+        if is_input_full == False:
+                display_default_image()    
         
         if is_text_inputted and is_input_full:
             [Cell.draw() for Cell in grid_cells]
@@ -289,27 +288,42 @@ def one_player(run):
             pygame.draw.rect(screen, pygame.Color("blue"), ((cell_size * breadth_current_cell['x']) + 1 + distance_from_corner_x, ( cell_size * breadth_current_cell['y']) + 1 + distance_from_corner_y, cell_size - 1, cell_size - 1))
             pygame.display.update()
 
-        while search_complete == True:
+        if search_complete == True:
             while breadth_current_cell != start_walls:
                 previous_temp_x = breadth_current_cell["prev_x"]
                 previous_temp_y = breadth_current_cell["prev_y"]
                 pygame.draw.rect(screen, pygame.Color("yellow"), ((cell_size * breadth_current_cell['x']) + (cell_size/4) + distance_from_corner_x, ( cell_size * breadth_current_cell['y']) + (cell_size/4) + distance_from_corner_y, cell_size - (cell_size//2), cell_size - (cell_size//2)))
                 next_cell_check = array_of_possible_cells[((breadth_current_cell["y"] * collums) + (breadth_current_cell["x"])) + ((previous_temp_y - breadth_current_cell["y"]) * collums) + (previous_temp_x - breadth_current_cell["x"])]
-                breadth_current_cell = next_cell_check
-                pygame.display.update()
+                breadth_current_cell = next_cell_check        
                 pygame.draw.rect(screen, pygame.Color("green"), ((cell_size * start_walls['x']) + ((2*cell_size)//10) + distance_from_corner_x, ( cell_size * start_walls['y']) + ((2*cell_size)//10) + distance_from_corner_y, cell_size - ((2*cell_size)//5), cell_size - ((2*cell_size)//5)))
-            
-                
-                 
+            pygame.display.update() 
+            pygame.time.wait(6000)
+            [Cell.reset() for Cell in grid_cells]
+            maze_clicked_number = 0
+            maze_complete = False
+            user_text = user_text[:-2]
+            is_text_inputted = False
+            is_input_full = False
+            one_player(run)
 
         pygame.draw.rect(screen, colour, input_size_rect)
         input_text_surface = get_font(32).render(user_text, True, (255, 255, 255))
         screen.blit(input_text_surface, (input_size_rect.x + 5, input_size_rect.y + 5))
         input_size_rect.w = max(140, input_text_surface.get_width() + 10)     
-        
-        clock.tick(200)
+        info_text_line_1 = get_font(13).render("input a maze size, and when the maze", True, "#b68f40")
+        info_rect_line_1 = info_text_line_1.get_rect(center=(150,30))   
+        info_text_line_2 = get_font(13).render("has generated, click two points on the", True, "#b68f40")
+        info_rect_line_2 = info_text_line_2.get_rect(center=(150,50))
+        info_text_line_3 = get_font(13).render("maze and watch the magic happen", True, "#b68f40")
+        info_rect_line_3 = info_text_line_3.get_rect(center=(150,70))     
+        input_box_text = get_font(11).render("input a number between 1-99", True, "#b68f40")
+        input_box_rect = input_box_text.get_rect(center=(100,420)) 
+        screen.blit(info_text_line_1, info_rect_line_1)
+        screen.blit(info_text_line_2, info_rect_line_2)
+        screen.blit(info_text_line_3, info_rect_line_3)
+        screen.blit(input_box_text, input_box_rect)
+        clock.tick(2000)
         pygame.display.update()
-        
         
 def two_player(run):  
     while run:
