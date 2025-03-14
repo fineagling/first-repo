@@ -274,15 +274,25 @@ def one_player(run, current_cell):
             current_cell.draw_current_cell(visited_origin)
 
             next_cell = current_cell.check_neighbours()
+            #sets the next cell to the choice that is retund by the check neighbours function
             if next_cell:
+            #if there is a next cell that the program can go to 
                 next_cell.visited = True
+                #sets the next cell to visited
                 stack.append(current_cell)
+                #add the current cell to the stack
                 remove_walls(current_cell, next_cell)
+                #remove the walls between the current and next cell
                 current_cell = next_cell
+                #set the current cell to the next cell
             elif stack:
+            #if there are items in the stack
                 current_cell = stack.pop()
+                #pop the stack so that the DFS can backtrack
             elif next_cell == False:
+            #if all of the cells have been visited
                 maze_complete = True
+                #set maze complete to true to signify that generation is complete
             
         if active:
             colour = colour_input_active
