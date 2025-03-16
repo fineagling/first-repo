@@ -338,7 +338,7 @@ def one_player(run, current_cell):
 #This line defines the one player part of the game
     number_of_run_loops = 0
     search_complete = False
-    #These lines define 2 variables used only in the one player part, number f run loops and search complete
+    #These lines define 2 variables used only in the one player part, number of run loops and search complete
     while run:
     #This is the run loop
         screen.fill("#2a0807")
@@ -510,54 +510,82 @@ def one_player(run, current_cell):
             #This calls the one player sub-routine
 
         pygame.draw.rect(screen, colour, input_size_rect)
+        #This line darws the rectangle for the input box to be drawn onto
         input_text_surface = get_font(32).render(user_text, True, (255, 255, 255))
+        #This defines the input box text surface
         screen.blit(input_text_surface, (input_size_rect.x + 5, input_size_rect.y + 5))
+        #This draws the input box rectangle and text surface onto the screen
         input_size_rect.w = max(140, input_text_surface.get_width() + 10)     
+        #This line sets where text actually gets drawn onto the box, and how far away the text can be from the sides
         info_text_line_1 = get_font(12).render("input a maze size, and when the maze has", True, "#b68f40")
         info_rect_line_1 = info_text_line_1.get_rect(center=(150,30))   
         info_text_line_2 = get_font(12).render("generated, click two points on the maze,", True, "#b68f40")
         info_rect_line_2 = info_text_line_2.get_rect(center=(150,50))
         info_text_line_3 = get_font(12).render("click again and watch the magic happen", True, "#b68f40")
         info_rect_line_3 = info_text_line_3.get_rect(center=(150,70))     
+        #These lines define text surfaces and and rectangles for 3 lines of the explanation in the top left corner
         input_box_text = get_font(11).render("input a number between 1-99 for your maze complexity", True, "#b68f40")
         input_box_rect = input_box_text.get_rect(center=(100,420)) 
+        #These lines define a text surface and rectange to draw onto for the text above the input box
         screen.blit(info_text_line_1, info_rect_line_1)
         screen.blit(info_text_line_2, info_rect_line_2)
         screen.blit(info_text_line_3, info_rect_line_3)
         screen.blit(input_box_text, input_box_rect)
+        #These lines draw all of the text onto the screen
         clock.tick(2000)
+        #This line affects the tick speed, which is how fast the DFS runs
         pygame.display.update()
         
 def two_player(run, current_cell, length_of_path, number_of_maze_generations, player_1_score, player_2_score): 
+#This line defines the two player part of the game
     number_of_run_loops = 0
     search_complete = False 
+    #These lines define 2 variables used only in the one player part, number of run loops and search complete
     global path_complete
     path_complete = False
+    #This line defines a path complete variable which is needed to calculate the score of both players
     while run:
+    #This is the run loop
         screen.fill("#2a0807")
+        #This fils the screen with a background colour
         two_play_mouse_pos = pygame.mouse.get_pos()
+        #This defines a two player mouse position using the pygame get mouse position built in function
         TWO_PLAY_BACK = Button(pos=(100, 600), button_font= get_font(50), base_colour= white, hovering_colour= "#d7fcd4", input_text="BACK", image= "assets/back_rect.png", x_start=50, y_start= 550, x_end= 150, y_end=650)
+        #This defines a two player back button from the button class that was created 
         global maze_complete, active, user_text, colour, is_text_inputted, is_input_full, maze_clicked_number
         for button in [TWO_PLAY_BACK]:
             button.changecolour(two_play_mouse_pos)
             button.text_update(screen)
+        #This mini for loop runs the change colour and text update methods for the back button    
 
         for event in pygame.event.get():
+        #This is the start of the event handler
             if event.type == pygame.QUIT:
+            #If the user clicks the x in the top right on the window
                 pygame.quit()
                 sys.exit()
+            #stop the program and close the window    
             if event.type == pygame.MOUSEBUTTONDOWN:
+            #If there is a click then enter this if statement
                 if TWO_PLAY_BACK.checkforinput(two_play_mouse_pos):
+                #if when the program runs the check for input method for the back button, and an input is registered enter the if statement    
                     [Cell.reset() for Cell in grid_cells]
+                    #carry out the reset method from the cell class for every cell in the maze
                     maze_clicked_number = 0
                     maze_complete = False
                     user_text = user_text[:-2]
                     is_text_inputted = False
                     is_input_full = False
+                    #These lines reset every variable needed to reset in order to start the DFS and BFS again
                     main_menu()
+                    #Call the main menu function
                 if maze_complete and check_if_mouse_in_maze(two_play_mouse_pos) and maze_clicked_number <= 2:
+                    #if the maze generation is complete and the mouse is in the maze and the maze clicked number is less than 2 then enter this if statement
                     gather_cell_number(two_play_mouse_pos)
+                    #call the gather cell number function
                     maze_clicked_number = maze_clicked_number + 1
+                    #add one to the maze clicked number
+                #############################################################################################################################################
                 if maze_clicked_number == 3:
                     breadth_first_search_variables(start_coordinate, end_coordinate)  
                     number_of_run_loops = number_of_run_loops + 1
