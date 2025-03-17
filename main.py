@@ -585,26 +585,42 @@ def two_player(run, current_cell, length_of_path, number_of_maze_generations, pl
                     #call the gather cell number function
                     maze_clicked_number = maze_clicked_number + 1
                     #add one to the maze clicked number
-                #############################################################################################################################################
                 if maze_clicked_number == 3:
+                #if the maze clicked number is 3 then enter the if statement
                     breadth_first_search_variables(start_coordinate, end_coordinate)  
+                    #call the BFS variables function
                     number_of_run_loops = number_of_run_loops + 1
+                    #add one to the number of run loops
                     if number_of_run_loops == 1:
                         queue.append(start_walls)
+                        #if this is the first run loop, then add the start walls to the queue to start the BFS 
                 if input_size_rect.collidepoint(event.pos):
+                #if the input box has been clicked, then enter this part of the if  statement
                     active = True
+                    #set active as true
                 else:
+                #if the input box hasn't been clicked, then enter this part of the statement
                     active = False
-            if event.type == pygame.KEYDOWN and event.unicode.isdigit():               
+                    #set active to false
+            if event.type == pygame.KEYDOWN and event.unicode.isdigit():    
+            #if the event is a key has been pressed and it is a digit (number) enter this if statement
                 is_text_inputted = True
+                #set is text inputted to true
                 if len(user_text) <= 1:
+                #if the legnth of what has been inputted is less than 2
                     user_text += event.unicode
+                    #add the digit to the input box
                 else:
+                #if the input box hasn't been clicked, then enter this part of the statement
                     cell_size_change(cell_size, user_text, collums, rows)
+                    #call the cell size change function to change the cell size of the maze
                     is_input_full = True
+                    #set input full to true
             if event.type == pygame.KEYDOWN and is_input_full == False:
+            #if a key has been pressed and the input box isn't full then enter the if statement
                 if event.key == pygame.K_BACKSPACE:
                     user_text = user_text[:-1]
+                    #if the key pressed is the backspace, then delete the most recent digit inputted into the input box
 
             
         if is_input_full == False:
