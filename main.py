@@ -419,7 +419,7 @@ def one_player(run, current_cell):
             
         if is_input_full == False:
                 display_default_image()    
-                #if the inpt box is not full then call the display default image function
+                #if the input box is not full then call the display default image function
         
         if is_text_inputted and is_input_full:
         #if there has been text inputted into the input box, and the input box is full then start the DFS 
@@ -624,51 +624,87 @@ def two_player(run, current_cell, length_of_path, number_of_maze_generations, pl
 
             
         if is_input_full == False:
-                display_default_image()    
+            display_default_image() 
+            #if the input box is not full then call the display default image function
         
         if is_text_inputted and is_input_full:
+        #if there has been text inputted into the input box, and the input box is full then start the DFS 
             [Cell.draw() for Cell in grid_cells]
+            #carry out the draw method for every cell in the maze
             current_cell.visited = True
+            #set the current cell's visited atribute to true
             current_cell.draw_current_cell(visited_origin)
-
+            #carry out the draw current cell method on the current cell
             next_cell = current_cell.check_neighbours()
+            #sets the next cell to the choice that is retund by the check neighbours function
             if next_cell:
+            #if there is a next cell that the program can go to 
                 next_cell.visited = True
+                #sets the next cell to visited
                 stack.append(current_cell)
+                #add the current cell to the stack
                 remove_walls(current_cell, next_cell)
+                #remove the walls between the current and next cell
                 current_cell = next_cell
+                #set the current cell to the next cell
             elif stack:
+            #if there are items in the stack
                 current_cell = stack.pop()
+                #pop the stack so that the DFS can backtrack
             elif next_cell == False:
+            #if all of the cells have been visited
                 maze_complete = True
+                #set maze complete to true to signify that generation is complete
             
         if active:
             colour = colour_input_active
+            #if active is true then set the colour to the active colour
         else:
             colour = colour_input_passive
+            #if active is not true then set the colour to the passive colour
 
         while len(queue) > 0 and search_complete != True:
+        #while the length of the queue is greater than zero and the search isn't complete
             breadth_current_cell = queue.popleft()
+            #dequeue the queue and assign the deuqueue to breadth current cell
             if breadth_current_cell == end_walls:
+            #if the current cell is the end walls
                 pygame.draw.rect(screen, pygame.Color("blue"), ((cell_size * breadth_current_cell['x']) + 1 + distance_from_corner_x, ( cell_size * breadth_current_cell['y']) + 1 + distance_from_corner_y, cell_size - 1, cell_size - 1))
+                #draw the end walls cell in blue
                 search_complete = True
+                #change search complete to true
                 [Cell.draw() for Cell in grid_cells]
+                #redraw the grid, so that all of the black backgrounds get drawn, and gets rid of the blue tiles
                 break
+                #break out of this while loop
             BFS_check_neighbours(breadth_current_cell)
+            #call the BFS check neighbours function
             visited.append(breadth_current_cell)
+            #add the current cell to the visited list
             pygame.draw.rect(screen, pygame.Color("blue"), ((cell_size * breadth_current_cell['x']) + 1 + distance_from_corner_x, ( cell_size * breadth_current_cell['y']) + 1 + distance_from_corner_y, cell_size - 1, cell_size - 1))
+            #draw a blue tile in the position of the current cell
             pygame.display.update()
+            #update the display
 
         if search_complete == True:
+        #if the search is complete
             while breadth_current_cell != start_walls:
+            #while the current cell is not equal to the start walls, as this loop follows the previous tiles after the search from the end walls to the start walls
                 previous_temp_x = breadth_current_cell["prev_x"]
                 previous_temp_y = breadth_current_cell["prev_y"]
+                #create an x and a y temporary variable holding the values of the prev x and prev y keys of the current cell dictionary
                 pygame.draw.rect(screen, pygame.Color("yellow"), ((cell_size * breadth_current_cell['x']) + (cell_size/4) + distance_from_corner_x, ( cell_size * breadth_current_cell['y']) + (cell_size/4) + distance_from_corner_y, cell_size - (cell_size//2), cell_size - (cell_size//2)))
+                #This draws a small yellow square in the position of the current cell to show the path
                 next_cell_check = array_of_possible_cells[((breadth_current_cell["y"] * collums) + (breadth_current_cell["x"])) + ((previous_temp_y - breadth_current_cell["y"]) * collums) + (previous_temp_x - breadth_current_cell["x"])]
-                breadth_current_cell = next_cell_check        
+                #This sets a placeholder variable equal to the previous cell of the current cell using the temporary variables that have just been defined and the array of possible cells that was defined earlier
+                breadth_current_cell = next_cell_check  
+                #this sets the placeholder variable equal to the current cell
                 pygame.draw.rect(screen, pygame.Color("green"), ((cell_size * start_walls['x']) + ((2*cell_size)//10) + distance_from_corner_x, ( cell_size * start_walls['y']) + ((2*cell_size)//10) + distance_from_corner_y, cell_size - ((2*cell_size)//5), cell_size - ((2*cell_size)//5)))
+                #this draws the start walls cell in green, as this cell wasn't being drawn 
                 length_of_path = length_of_path + 1
+                #This increases the length of path as the number of times this loop loops is the length of the path
             path_complete = True
+            #This sets the path to complete
             pygame.display.update() 
             pygame.time.wait(6000)
             [Cell.reset() for Cell in grid_cells]
@@ -677,66 +713,96 @@ def two_player(run, current_cell, length_of_path, number_of_maze_generations, pl
             user_text = user_text[:-2]
             is_text_inputted = False
             is_input_full = False
+            #These lines reset the program once that the program has broken out of the while loop
             if number_of_maze_generations % 2 == 1 and path_complete == True:
                 player_1_score = player_1_score + (length_of_path//(abs(start_walls["x"] - end_walls["x"]) + abs(start_walls["y"] - end_walls["y"])) * 2)
+                #If the number of maze generations MOD 2 is 1, and the path is complete, then calculate player 1 score using the length of the path
             elif number_of_maze_generations % 2 == 0 and path_complete == True:
                 player_2_score = player_2_score + (length_of_path//(abs(start_walls["x"] - end_walls["x"]) + abs(start_walls["y"] - end_walls["y"])) * 2)
+                #If the number of maze generations MOD 2 is 0, and the path is complete, then calculate player 2 score using the length of the path
             number_of_maze_generations = number_of_maze_generations + 1
             two_player(run, current_cell, length_of_path, number_of_maze_generations, player_1_score, player_2_score)
+            #run two player mode
 
 
         pygame.draw.rect(screen, colour, input_size_rect)
+        #This line darws the rectangle for the input box to be drawn onto
         input_text_surface = get_font(32).render(user_text, True, (255, 255, 255))
+        #This defines the input box text surface
         screen.blit(input_text_surface, (input_size_rect.x + 5, input_size_rect.y + 5))
-        input_size_rect.w = max(140, input_text_surface.get_width() + 10)     
+        #This draws the input box rectangle and text surface onto the screen
+        input_size_rect.w = max(140, input_text_surface.get_width() + 10)    
+        #This line sets where text actually gets drawn onto the box, and how far away the text can be from the sides
         info_text_line_1 = get_font(12).render("input a maze size, and when the maze has", True, "#b68f40")
         info_rect_line_1 = info_text_line_1.get_rect(center=(150,140))   
         info_text_line_2 = get_font(12).render("generated, click two points on the maze,", True, "#b68f40")
         info_rect_line_2 = info_text_line_2.get_rect(center=(150,160))
         info_text_line_3 = get_font(12).render("click again and watch the magic happen", True, "#b68f40")
         info_rect_line_3 = info_text_line_3.get_rect(center=(150,180))     
+        #These lines define text surfaces and and rectangles for 3 lines of the explanation in the top left corner
         input_box_text = get_font(11).render("input a number between 1-99", True, "#b68f40")
         input_box_rect = input_box_text.get_rect(center=(100,420)) 
+        #These lines define a text surface and rectange to draw onto for the text above the input box
         screen.blit(info_text_line_1, info_rect_line_1)
         screen.blit(info_text_line_2, info_rect_line_2)
         screen.blit(info_text_line_3, info_rect_line_3)
         screen.blit(input_box_text, input_box_rect)
+        #These lines draw all of the text onto the screen
         player_1_score_text = get_font(20).render(f"player 1 score: {player_1_score}", True, "#b68f40")
         player_1_score_rect = player_1_score_text.get_rect(center=(150,40))
         screen.blit(player_1_score_text, player_1_score_rect)
+        #These lines set the text item, and ectangle for player 1's score and then draws them onto the screen
         player_2_score_text = get_font(20).render(f"player 2 score: {player_2_score}", True, "#b68f40")
         player_2_score_rect = player_2_score_text.get_rect(center=(150,80))
-        screen.blit(player_2_score_text, player_2_score_rect)        
+        screen.blit(player_2_score_text, player_2_score_rect)      
+        #These lines set the text item, and ectangle for player 1's score and then draws them onto the screen
         clock.tick(2000)
+        #This line affects the tick speed, which is how fast the DFS runs
         pygame.display.update()    
 
 def main_menu():
+#This defines the main menu function
     while run == True:
+    #This is the run loop
         screen.blit(menu_backGround, (0,0))
+        #This draws the menu background image onto the screen
         menu_mouse_pos = pygame.mouse.get_pos()
+        #This defines the menu mouse position for the mouse to be used in the maze
         heading_main_menu_text = get_font(180).render("MAZE", True, "#b68f40")
         menu_rect = heading_main_menu_text.get_rect(center=(640,100))
+        #These lines define the heading text item and the rectangle surface to draw it onto
         ONE_PLAYER_BUTTON = Button(pos=(640,250), button_font=get_font(60), base_colour= white, hovering_colour="#d7fcd4", input_text="1 PLAYER", image=None, x_start=475, y_start=200, x_end=780, y_end=300)
         TWO_PLAYER_BUTTOM = Button(pos=(640,400), button_font=get_font(60), base_colour=white, hovering_colour="#d7fcd4", input_text="2 PLAYER", image=None, x_start=475, y_start=350, x_end=780, y_end=450) 
         QUIT_BUTTON = Button(pos=(640,550), button_font=get_font(60), base_colour=white, hovering_colour="#d7fcd4", input_text="QUIT", image=None, x_start=475, y_start=500, x_end=780, y_end=600) 
+        #These lines use the button class to define the one player two player and quit buttons on the main menu
         screen.blit(heading_main_menu_text, menu_rect)
+        #This draws the heading text and surface onto the screen
         for button in [ONE_PLAYER_BUTTON, TWO_PLAYER_BUTTOM, QUIT_BUTTON]:
             button.changecolour(menu_mouse_pos)
             button.text_update(screen)
+            #This mini for loop carries out the change colour and text update methods for all 3 buttons that have just been made
         
         for event in pygame.event.get():
+        #This is the start of an event handler
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+                #If the user clicks the x in the top right of the screen, then the program should stop and then the window should close
             if event.type == pygame.MOUSEBUTTONDOWN:
+            #if the event is a click
                 if ONE_PLAYER_BUTTON.checkforinput(menu_mouse_pos):
                     one_player(run, current_cell)
+                    #if the method for the check for input returns true for the one player button run the one player mode
                 if TWO_PLAYER_BUTTOM.checkforinput(menu_mouse_pos):
                     two_player(run, current_cell, length_of_path, number_of_maze_generations, player_1_score, player_2_score)
+                    #if the method for the check for input returns true for the two player button run the two player mode
                 if QUIT_BUTTON.checkforinput(menu_mouse_pos):
                     pygame.quit()
                     sys.exit()
+                    #If the quit button is clicked then stop th program running, and close the window
 
         pygame.display.update()
+        #update the display
 main_menu()
+#The program automatically goes to the main menu
 
